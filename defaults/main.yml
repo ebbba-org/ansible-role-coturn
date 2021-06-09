@@ -1,0 +1,33 @@
+---
+coturn_listening_port: 3478
+coturn_tls_listening_port: 443
+listening_ip: "{{ ansible_host }}"
+
+# (D)TLS is currently unsupported by Nextcloud Talk and does not have a real
+# security benefit anyway. For further information, see:
+# * https://github.com/coturn/coturn/issues/33
+# * https://github.com/nextcloud/spreed/issues/257
+coturn_tls: True
+coturn_tls_cert: "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
+coturn_tls_key: "/etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem"
+
+coturn_dhparam_length: 2048
+
+coturn_denied_peer_ips:
+  - 0.0.0.0-0.255.255.255
+  - 10.0.0.0-10.255.255.255
+  - 100.64.0.0-100.127.255.255
+  - 127.0.0.0-127.255.255.255
+  - 169.254.0.0-169.254.255.255
+  - 172.16.0.0-172.31.255.255
+  - 192.0.0.0-192.0.0.255
+  - 192.0.2.0-192.0.2.255
+  - 192.88.99.0-192.88.99.255
+  - 192.168.0.0-192.168.255.255
+  - 198.18.0.0-198.19.255.255
+  - 198.51.100.0-198.51.100.255
+  - 203.0.113.0-203.0.113.255
+  - 240.0.0.0-255.255.255.255
+
+# 1 for verbose, 2 for Verbose (very verbose)
+coturn_verbosity: 0
