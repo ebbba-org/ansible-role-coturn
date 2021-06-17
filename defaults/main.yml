@@ -1,6 +1,10 @@
 ---
 coturn_listening_port: 3478
 coturn_tls_listening_port: 443
+coturn_min_port: 4096
+coturn_max_port: 65535
+coturn_user_quota: 0
+coturn_total_quota: 0
 listening_ip: "{{ ansible_host }}"
 
 # (D)TLS is currently unsupported by Nextcloud Talk and does not have a real

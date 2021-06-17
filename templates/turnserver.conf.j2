@@ -152,8 +152,8 @@ external-ip={{ ip }}
 # Lower and upper bounds of the UDP relay endpoints:
 # (default values are 49152 and 65535)
 #
-#min-port=49152
-#max-port=65535
+min-port={{ coturn_min_port }}
+max-port={{ coturn_max_port }}
 
 # Uncomment to run TURN server in 'normal' 'moderate' verbose mode.
 # By default the verbose mode is off.
@@ -178,7 +178,7 @@ fingerprint
 # Uncomment to use long-term credential mechanism.
 # By default no credentials mechanism is used (any user allowed).
 #
-lt-cred-mech
+# lt-cred-mech
 
 # This option is opposite to lt-cred-mech. 
 # (TURN Server with no-auth option allows anonymous access).
@@ -360,14 +360,15 @@ realm={{ coturn_realm }}
 # Per-user allocation quota.
 # default value is 0 (no quota, unlimited number of sessions per user).
 # This option can also be set through the database, for a particular realm.
-#
-#user-quota=0
+# 24-32
+user-quota={{ coturn_user_quota }}
 
 # Total allocation quota.
 # default value is 0 (no quota).
 # This option can also be set through the database, for a particular realm.
 #
-total-quota=100
+# 240000
+total-quota={{ coturn_total_quota }}
 
 # Max bytes-per-second bandwidth a TURN session is allowed to handle
 # (input and output network streams are treated separately). Anything above
@@ -422,7 +423,7 @@ bps-capacity=0
 # It defaults to 600 secs (10 min) if no value is provided. After that delay, 
 # the client will get 438 error and will have to re-authenticate itself.
 #
-stale-nonce
+# stale-nonce
 
 # Uncomment if you want to set the maximum allocation
 # time before it has to be refreshed.
@@ -633,7 +634,7 @@ denied-peer-ip={{ ip }}
 
 # Mobility with ICE (MICE) specs support.
 #
-#mobility
+# mobility
 
 # Allocate Address Family according 
 # If enabled then TURN server allocates address family according  the TURN 
@@ -641,7 +642,7 @@ denied-peer-ip={{ ip }}
 # (By default coTURN works according RFC 6156.)
 # !!Warning: Enabling this option breaks RFC6156 section-4.2 (violates use default IPv4)!!
 #
-#keep-address-family
+# keep-address-family
 
 # User name to run the process. After the initialization, the turnserver process
 # will make an attempt to change the current user ID to that user.
@@ -657,7 +658,7 @@ denied-peer-ip={{ ip }}
 # By default it is always ON.
 # See also options cli-ip and cli-port.
 #
-#no-cli
+no-cli
 
 #Local system IP address to be used for CLI server endpoint. Default value
 # is 127.0.0.1.
@@ -718,6 +719,6 @@ denied-peer-ip={{ ip }}
 
 # Do not allow an TLS/DTLS version of protocol
 #
-#no-tlsv1
-#no-tlsv1_1
+no-tlsv1
+no-tlsv1_1
 #no-tlsv1_2
