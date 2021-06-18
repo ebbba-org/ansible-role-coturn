@@ -3,7 +3,7 @@
 - name: install coturn
   apt:
     pkg: coturn
-    state: latest
+    state: present
 
 - name: Give coturn access to TLS cert
   user:
@@ -18,7 +18,7 @@
     entity: turnserver
     etype: user
     permissions: rx
-    recursive: yes
+    recursive: true
     state: present
 
 - name: Create systemd override for coturn

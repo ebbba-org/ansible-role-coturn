@@ -11,7 +11,7 @@ listening_ip: "{{ ansible_host }}"
 # security benefit anyway. For further information, see:
 # * https://github.com/coturn/coturn/issues/33
 # * https://github.com/nextcloud/spreed/issues/257
-coturn_tls: True
+coturn_tls: true
 coturn_tls_cert: "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
 coturn_tls_key: "/etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem"
 
