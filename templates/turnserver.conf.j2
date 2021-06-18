@@ -27,7 +27,7 @@ listening-port={{ coturn_listening_port }}
 # TLS version 1.0, 1.1 and 1.2.
 # For secure UDP connections, we support DTLS version 1.
 #
-{% if not coturn_tls %}#{% endif %}tls-listening-port={{ coturn_tls_listening_port }}
+{% if not coturn_use_tls %}#{% endif %}tls-listening-port={{ coturn_tls_listening_port }}
 
 # Alternative listening port for UDP and TCP listeners;
 # default (or zero) value means "listening port plus one". 
@@ -52,7 +52,7 @@ listening-port={{ coturn_listening_port }}
 #listening-ip=172.17.19.101
 #listening-ip=10.207.21.238
 #listening-ip=2607:f0d0:1002:51::4
-listening-ip={{ listening_ip }}
+listening-ip={{ coturn_listening_ip }}
 
 # Auxiliary STUN/TURN server listening endpoint.
 # Aux servers have almost full TURN and STUN functionality.
@@ -97,6 +97,7 @@ listening-ip={{ listening_ip }}
 #
 #relay-ip=172.17.19.105
 #relay-ip=2607:f0d0:1002:51::5
+relay-ip={{ coturn_listening_ip }}
 
 # For Amazon EC2 users:
 #
@@ -348,7 +349,7 @@ static-auth-secret={{ coturn_static_auth_secret }}
 # Note: If default realm is not specified at all, then realm falls back to the host domain name.
 #       If domain name is empty string, or '(None)', then it is initialized to am empty string.
 #
-realm={{ coturn_realm }}
+{% if coturn_realm is defined %}realm={{ coturn_realm }}{% endif %}
 
 # The flag that sets the origin consistency 
 # check: across the session, all requests must have the same
@@ -449,14 +450,14 @@ bps-capacity=0
 # Use an absolute path or path relative to the 
 # configuration file.
 #
-{% if not coturn_tls %}#{% endif %}cert={{ coturn_tls_cert }}
+{% if not coturn_use_tls %}#{% endif %}cert={{ coturn_tls_cert }}
 
 # Private key file.
 # Use an absolute path or path relative to the 
 # configuration file.
 # Use PEM file format.
 #
-{% if not coturn_tls %}#{% endif %}pkey={{ coturn_tls_key }}
+{% if not coturn_use_tls %}#{% endif %}pkey={{ coturn_tls_key }}
 
 # Private key file password, if it is in encoded format.
 # This option has no default value.
@@ -466,7 +467,7 @@ bps-capacity=0
 # Allowed OpenSSL cipher list for TLS/DTLS connections.
 # Default value is "DEFAULT".
 #
-{% if not coturn_tls %}#{% endif %}cipher-list="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5"
+{% if not coturn_use_tls %}#{% endif %}cipher-list="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5"
 
 # CA file in OpenSSL format. 
 # Forces TURN server to verify the client SSL certificates.
@@ -495,14 +496,14 @@ bps-capacity=0
 # Use custom DH TLS key, stored in PEM format in the file.
 # Flags --dh566 and --dh2066 are ignored when the DH key is taken from a file.
 #
-{% if not coturn_tls %}#{% endif %}dh-file=/etc/coturn-dh-{{ coturn_dhparam_length }}.pem
+{% if not coturn_use_tls %}#{% endif %}/etc/dhparam.pem
 
 # Flag to prevent stdout log messages.
 # By default, all log messages are going to both stdout and to 
 # the configured log file. With this option everything will be 
 # going to the configured log only (unless the log file itself is stdout).
 #
-#no-stdout-log
+no-stdout-log
 
 # Option to set the log file name.
 # By default, the turnserver tries to open a log file in 
@@ -515,7 +516,7 @@ bps-capacity=0
 # In the runtime, the logfile can be reset with the SIGHUP signal 
 # to the turnserver process.
 #
-#log-file=/var/tmp/turn.log
+log-file=/var/log/{{ 'coturn' if ansible_os_family == 'RedHat' else 'turnserver' }}/turnserver.log
 
 # Option to redirect all log output into system log (syslog).
 #
@@ -525,7 +526,7 @@ syslog
 # name will be constructed as-is, without PID and date appendage.
 # This option can be used, for example, together with the logrotate tool.
 #
-#simple-log
+simple-log
 
 # Option to set the "redirection" mode. The value of this option
 # will be the address of the alternate server for UDP & TCP service in form of 
@@ -626,6 +627,11 @@ denied-peer-ip={{ ip }}
 # /var/tmp/turnserver.pid .
 #
 #pidfile="/var/run/turnserver.pid"
+{% if ansible_os_family == 'RedHat' %}
+pidfile=/run/coturn/turnserver.pid
+{% else %}
+pidfile=/run/turnserver/turnserver.pid
+{% endif %}
 
 # Require authentication of the STUN Binding request.
 # By default, the clients are allowed anonymous access to the STUN Binding functionality.
@@ -642,7 +648,7 @@ denied-peer-ip={{ ip }}
 # (By default coTURN works according RFC 6156.)
 # !!Warning: Enabling this option breaks RFC6156 section-4.2 (violates use default IPv4)!!
 #
-# keep-address-family
+keep-address-family
 
 # User name to run the process. After the initialization, the turnserver process
 # will make an attempt to change the current user ID to that user.
@@ -721,4 +727,4 @@ no-cli
 #
 no-tlsv1
 no-tlsv1_1
-#no-tlsv1_2
+no-tlsv1_2

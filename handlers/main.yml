@@ -1,5 +1,9 @@
 ---
 
+- name: systemd daemon-reload
+  systemd:
+    daemon_reload: yes
+
 - name: restart coturn
   service:
     name: coturn
