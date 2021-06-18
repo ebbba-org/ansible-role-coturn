@@ -80,8 +80,3 @@
     group: root
     mode: 0644
   notify: restart coturn
-
-- name: Start / Restart coturn
-  service:
-    name: coturn
-    state: restarted
