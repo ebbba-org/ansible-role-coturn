@@ -1,21 +1,25 @@
 ---
 coturn_listening_port: 3478
 coturn_tls_listening_port: 443
-coturn_min_port: 4096
+coturn_min_port: 32769
 coturn_max_port: 65535
 coturn_user_quota: 0
 coturn_total_quota: 0
 listening_ip: "{{ ansible_host }}"
+relay_ip: "{{ ansible_host }}"
 
 # (D)TLS is currently unsupported by Nextcloud Talk and does not have a real
 # security benefit anyway. For further information, see:
 # * https://github.com/coturn/coturn/issues/33
 # * https://github.com/nextcloud/spreed/issues/257
 coturn_tls: true
+coturn_own_certs: false
+coturn_own_tls_cert: ""
+coturn_own_tls_key: ""
 coturn_tls_cert: "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
 coturn_tls_key: "/etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem"
 
-coturn_dhparam_length: 2048
+coturn_dhparam_length: 4096
 
 coturn_denied_peer_ips:
   - 0.0.0.0-0.255.255.255
