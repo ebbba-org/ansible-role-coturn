@@ -3,7 +3,8 @@ coturn_listening_port: 3478
 coturn_min_port: 32769
 coturn_max_port: 65535
 coturn_listening_ip: "{{ ansible_host }}"
-
+coturn_user_quota: 0
+coturn_total_quota: 0
 # You need to set the same static authentification secret
 # for this coturn instance here *and* in BigBlueButton
 # (obviously, never use the default).
