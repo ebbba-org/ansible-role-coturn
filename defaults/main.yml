@@ -20,7 +20,7 @@ coturn_use_tls: true
 coturn_tls_listening_port: 443
 # If you use tls you need to define the directory where
 # your tls certificate files are located
-# (e.g. /etc/letsencrypt/ or /etc/nginx/ssl/).
+# (e.g. /etc/letsencrypt or /etc/nginx/ssl).
 coturn_tls_cert_dir:
 # If you use tls you need to specify the full name and path
 # to the tls certificate and key files.
