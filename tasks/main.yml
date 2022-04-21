@@ -20,6 +20,10 @@
       groups: "{{ coturn_tls_group }}"
       append: true
     when: coturn_tls_group is defined
+  - name: Get file info of TLS Folder
+    stat:
+      path: "{{ coturn_tls_cert_dir }}"
+    register: stat_coturn_tls_cert_dir
   - name: Grant turnserver user access to certificate folder
     acl:
       path: "{{ coturn_tls_cert_dir }}"
@@ -28,6 +32,7 @@
       permissions: rx
       recursive: yes
       state: present
+    when: stat_coturn_tls_cert_dir.stat.exists
   - name: Setup certbot post hook
     template:
       src: "certbot/permission_fix.sh.j2"
@@ -35,7 +40,7 @@
       owner: "root"
       group: "root"
       mode: "0755"
-    when: coturn_tls_cert_dir == "/etc/letsencrypt"
+    when: stat_coturn_tls_cert_dir.stat.exists
   - name: Copy Diffie-Hellmann parameter (from https://ssl-config.mozilla.org/ffdhe2048.txt)
     copy:
       src: dhparam.pem
