@@ -3,7 +3,7 @@
 - name: Install coturn
   package:
     name: coturn
-    state: latest
+    state: "{{ coturn_install_state }}"
 
 - name: Manage tls permissions
   block:

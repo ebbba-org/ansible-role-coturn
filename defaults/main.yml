@@ -1,4 +1,5 @@
 ---
+coturn_install_state: "present"
 coturn_listening_port: 3478
 coturn_min_port: 32769
 coturn_max_port: 65535
