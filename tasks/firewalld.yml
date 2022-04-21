@@ -1,0 +1,24 @@
+---
+
+- name: firewalld enable coturn standard ports
+  firewalld:
+    port: "{{ item.port }}/{{ item.proto }}"
+    permanent: yes
+    state: enabled
+  loop:
+    - port: "{{ coturn_listening_port }}"
+      proto: tcp
+    - port: "{{ coturn_listening_port }}"
+      proto: udp
+    - port: "{{ coturn_min_port }}-{{ coturn_max_port }}"
+      proto: udp
+
+- name: firewalld enable coturn tls ports
+  firewalld:
+    port: item
+    permanent: yes
+    state: enabled
+  loop:
+    - "{{ coturn_tls_listening_port }}/tcp"
+    - "{{ coturn_tls_listening_port }}/udp"
+  when: coturn_use_tls

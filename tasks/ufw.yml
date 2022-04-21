@@ -1,0 +1,42 @@
+---
+
+- name: install dependencies
+  apt:
+    update_cache: true
+    name: ufw
+
+- name: ufw allow known services
+  ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: ufw allow coturn standard ports
+  ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - port: "{{ coturn_listening_port }}"
+      proto: tcp
+    - port: "{{ coturn_listening_port }}"
+      proto: udp
+    - port: "{{ coturn_min_port }}:{{ coturn_max_port }}"
+      proto: udp
+
+- name: ufw allow coturn tls port
+  ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - port: "{{ coturn_tls_listening_port }}"
+      proto: tcp
+    - port: "{{ coturn_tls_listening_port }}"
+      proto: udp
+  when: coturn_use_tls
+
+- name: enable firewall
+  ufw:
+    state: enabled
+    policy: reject
+    logging: off

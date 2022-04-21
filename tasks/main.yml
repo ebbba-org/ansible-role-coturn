@@ -1,25 +1,41 @@
 ---
 
-- name: install coturn
-  apt:
-    pkg: coturn
-    state: present
+- name: Install coturn
+  package:
+    name: coturn
+    state: latest
 
-- name: Give coturn access to TLS cert
-  user:
-    name: turnserver
-    groups: "{{ coturn_tls_group }}"
-    append: true
-  when: coturn_tls and coturn_tls_group is defined
-
-- name: Grant user Turnserver read execute access to /etc/letsencrypt/
-  acl:
-    path: /etc/letsencrypt/
-    entity: turnserver
-    etype: user
-    permissions: rx
-    recursive: true
-    state: present
+- name: Manage tls permissions
+  block:
+  - name: Fail if tls should be used but required values are not set
+    assert:
+      that:
+        - coturn_tls_listening_port is defined and coturn_tls_listening_port is truthy
+        - coturn_tls_cert_dir is defined and coturn_tls_cert_dir is truthy
+        - coturn_tls_cert is defined and coturn_tls_cert is truthy
+        - coturn_tls_key is defined and coturn_tls_key is truthy
+  - name: Add turnserver user to TLS group
+    user:
+      name: "{{ turn_user }}"
+      groups: "{{ coturn_tls_group }}"
+      append: true
+    when: coturn_tls_group is defined
+  - name: Grant turnserver user access to certificate folder
+    acl:
+      path: "{{ coturn_tls_cert_dir }}"
+      entity: "{{ turn_user }}"
+      etype: user
+      permissions: rx
+      recursive: yes
+      state: present
+  - name: Copy Diffie-Hellmann parameter (from https://ssl-config.mozilla.org/ffdhe2048.txt)
+    copy:
+      src: dhparam.pem
+      dest: /etc/dhparam.pem
+      owner: root
+      group: root
+      mode: '0644'
+  when: coturn_use_tls
 
 - name: Create systemd override for coturn
   block:
@@ -28,55 +44,49 @@
         path: /etc/systemd/system/coturn.service.d/
         state: directory
         mode: '0755'
-    - name: Apply coturn override template
-      template:
+    - name: Copy coturn systemd override file
+      copy:
         src: override.conf
         dest: /etc/systemd/system/coturn.service.d/override.conf
         owner: root
         group: root
         mode: '0644'
+      notify:
+        - systemd daemon-reload
+        - restart coturn
 
 - name: Create lograte structure
   block:
     - name: Create needed folder
       file:
         path: /var/log/turnserver
-        owner: turnserver
-        group: turnserver
+        owner: "{{ turn_user }}"
+        group: "{{ turn_user }}"
         state: directory
         mode: '0755'
-    - name: Template logrotate
-      template:
+    - name: Copy logrotate config
+      copy:
         src: logging.conf
         dest: /etc/logrotate.d/coturn
         owner: root
         group: root
         mode: '0644'
 
-- name: Set cap_net_bind_service=+ep on /usr/bin/turnserver
-  capabilities:
-    path: /usr/bin/turnserver
-    capability: cap_net_bind_service=+ep
-    state: present
-
-- name: ensure coturn is enabled
-  lineinfile:
-    dest: /etc/default/coturn
-    line: TURNSERVER_ENABLED=1
-    regexp: "^#?TURNSERVER_ENABLED="
-
-- name: Create parameters for Diffie–Hellman (could take a while)
-  command: "openssl dhparam -out /etc/coturn-dh-{{ coturn_dhparam_length }}.pem {{ coturn_dhparam_length }}"
-  args:
-    creates: /etc/coturn-dh-{{ coturn_dhparam_length }}.pem
-  when: coturn_tls
-  notify: restart coturn
-
-- name: configure coturn
+- name: Configure coturn
   template:
-    dest: /etc/turnserver.conf
     src: turnserver.conf.j2
+    dest: /etc/turnserver.conf
     owner: root
     group: root
     mode: 0644
+  notify: restart coturn
+
+- name: configure firewall on ubuntu
+  include: ufw.yml
+  when: ansible_os_family == 'Debian'
+  notify: restart coturn
+
+- name: configure firewall on Centos
+  include: firewalld.yml
+  when: ansible_os_family == 'RedHat'
   notify: restart coturn

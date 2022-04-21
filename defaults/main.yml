@@ -1,21 +1,32 @@
 ---
 coturn_listening_port: 3478
-coturn_tls_listening_port: 443
-coturn_min_port: 4096
+coturn_min_port: 32769
 coturn_max_port: 65535
-coturn_user_quota: 0
-coturn_total_quota: 0
-listening_ip: "{{ ansible_host }}"
+coturn_listening_ip: "{{ ansible_host }}"
 
-# (D)TLS is currently unsupported by Nextcloud Talk and does not have a real
-# security benefit anyway. For further information, see:
-# * https://github.com/coturn/coturn/issues/33
-# * https://github.com/nextcloud/spreed/issues/257
-coturn_tls: true
-coturn_tls_cert: "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
-coturn_tls_key: "/etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem"
+# You need to set the same static authentification secret
+# for this coturn instance here *and* in BigBlueButton
+# (obviously, never use the default).
+coturn_static_auth_secret: 1234
 
-coturn_dhparam_length: 2048
+# You should specify the realm of you coturn (see turnserver
+# config options), otherwise it defaults to the host domain name.
+# coturn_realm:
+
+# The tls variables should all be defined if you set
+# coturn_use_tls to true (recommended).
+coturn_use_tls: true
+coturn_tls_listening_port: 443
+# If you use tls you need to define the directory where
+# your tls certificate files are located
+# (e.g. /etc/letsencrypt/ or /etc/nginx/ssl/).
+coturn_tls_cert_dir:
+# If you use tls you need to specify the full name and path
+# to the tls certificate and key files.
+coturn_tls_cert:
+coturn_tls_key:
+# You can specify the coturn tls_group (optional).
+# coturn_tls_group:
 
 coturn_denied_peer_ips:
   - 0.0.0.0-0.255.255.255
@@ -35,3 +46,6 @@ coturn_denied_peer_ips:
 
 # 1 for verbose, 2 for Verbose (very verbose)
 coturn_verbosity: 0
+
+# coturn username on the host
+turn_user: "{{ 'coturn' if ansible_os_family == 'RedHat' else 'turnserver' }}"
