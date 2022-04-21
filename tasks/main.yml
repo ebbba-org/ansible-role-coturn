@@ -20,10 +20,22 @@
       groups: "{{ coturn_tls_group }}"
       append: true
     when: coturn_tls_group is defined
+
   - name: Get file info of TLS Folder
     stat:
       path: "{{ coturn_tls_cert_dir }}"
     register: stat_coturn_tls_cert_dir
+
+  - name: Get info of cert post hooks folder
+    stat:
+      path: /etc/letsencrypt/renewal-hooks/post
+    register: certbot_post_hooks
+
+  - name: Get info of cert pre hooks folder
+    stat:
+      path: /etc/letsencrypt/renewal-hooks/post
+    register: certbot_pre_hooks
+
   - name: Grant turnserver user access to certificate folder
     acl:
       path: "{{ coturn_tls_cert_dir }}"
@@ -33,14 +45,29 @@
       recursive: yes
       state: present
     when: stat_coturn_tls_cert_dir.stat.exists
-  - name: Setup certbot post hook
+
+  - name: Setup certbot pre hooks
     template:
-      src: "certbot/permission_fix.sh.j2"
-      dest: "/etc/letsencrypt/renewal-hooks/post/permission_fix.sh"
+      src: "{{ item }}"
+      dest: "/etc/letsencrypt/renewal-hooks/pre/{{ item | basename | regex_replace('\\.j2$', '') }}.sh"
       owner: "root"
       group: "root"
       mode: "0755"
-    when: stat_coturn_tls_cert_dir.stat.exists
+    with_fileglob:
+      - "../templates/certbot/pre/*.j2"
+    when: certbot_pre_hooks.stat.exists
+
+  - name: Setup certbot post hooks
+    template:
+      src: "{{ item }}"
+      dest: "/etc/letsencrypt/renewal-hooks/post/{{ item | basename | regex_replace('\\.j2$', '') }}.sh"
+      owner: "root"
+      group: "root"
+      mode: "0755"
+    with_fileglob:
+      - "../templates/certbot/post/*.j2"
+    when: certbot_post_hooks.stat.exists
+
   - name: Copy Diffie-Hellmann parameter (from https://ssl-config.mozilla.org/ffdhe2048.txt)
     copy:
       src: dhparam.pem
