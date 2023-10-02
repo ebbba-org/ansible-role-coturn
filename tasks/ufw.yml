@@ -23,7 +23,7 @@
     - port: "{{ coturn_min_port }}:{{ coturn_max_port }}"
       proto: udp
 
-- name: ufw allow coturn tls port
+- name: ufw allow coturn tls port and certificate renewal
   ufw:
     rule: allow
     port: "{{ item.port }}"
@@ -33,6 +33,8 @@
       proto: tcp
     - port: "{{ coturn_tls_listening_port }}"
       proto: udp
+    - port: 80
+      proto: tcp
   when: coturn_use_tls
 
 - name: enable firewall

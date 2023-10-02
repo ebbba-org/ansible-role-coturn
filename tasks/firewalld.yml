@@ -13,7 +13,7 @@
     - port: "{{ coturn_min_port }}-{{ coturn_max_port }}"
       proto: udp
 
-- name: firewalld enable coturn tls ports
+- name: firewalld enable coturn tls port and certificate renewal
   firewalld:
     port: item
     permanent: yes
@@ -21,4 +21,5 @@
   loop:
     - "{{ coturn_tls_listening_port }}/tcp"
     - "{{ coturn_tls_listening_port }}/udp"
+    - "80/tcp"
   when: coturn_use_tls
