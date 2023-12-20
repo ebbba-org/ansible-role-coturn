@@ -496,7 +496,7 @@ bps-capacity=0
 # Use custom DH TLS key, stored in PEM format in the file.
 # Flags --dh566 and --dh2066 are ignored when the DH key is taken from a file.
 #
-{% if not coturn_use_tls %}#{% endif %}/etc/dhparam.pem
+{% if not coturn_use_tls %}#{% endif %}dh-file=/etc/dhparam.pem
 
 # Flag to prevent stdout log messages.
 # By default, all log messages are going to both stdout and to 
