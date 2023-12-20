@@ -122,11 +122,9 @@
   notify: restart coturn
 
 - name: configure firewall on ubuntu
-  include: ufw.yml
+  include_tasks: ufw.yml
   when: ansible_os_family == 'Debian'
-  notify: restart coturn
 
 - name: configure firewall on Centos
-  include: firewalld.yml
+  include_tasks: firewalld.yml
   when: ansible_os_family == 'RedHat'
-  notify: restart coturn

@@ -22,6 +22,7 @@
       proto: udp
     - port: "{{ coturn_min_port }}:{{ coturn_max_port }}"
       proto: udp
+  notify: restart coturn
 
 - name: ufw allow coturn tls port
   ufw:
@@ -34,6 +35,7 @@
     - port: "{{ coturn_tls_listening_port }}"
       proto: udp
   when: coturn_use_tls
+  notify: restart coturn
 
 - name: enable firewall
   ufw:
