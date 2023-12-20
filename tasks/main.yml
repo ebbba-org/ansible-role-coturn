@@ -6,7 +6,6 @@
     state: "{{ coturn_install_state }}"
 
 - name: Manage tls permissions
-  when: coturn_tls_group is defined
   block:
   - name: Fail if tls should be used but required values are not set
     ansible.legacy.assert:
@@ -20,6 +19,7 @@
       name: "{{ turn_user }}"
       groups: "{{ coturn_tls_group }}"
       append: true
+    when: coturn_tls_group is defined
 
   - name: Get file info of TLS Folder
     ansible.legacy.stat:
