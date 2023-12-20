@@ -1,7 +1,7 @@
 ---
 
-- name: firewalld enable coturn standard ports
-  firewalld:
+- name: Firewalld enable coturn standard ports
+  ansible.posix.firewalld:
     port: "{{ item.port }}/{{ item.proto }}"
     permanent: yes
     state: enabled
@@ -14,8 +14,8 @@
       proto: udp
   notify: restart coturn
 
-- name: firewalld enable coturn tls ports
-  firewalld:
+- name: Firewalld enable coturn tls ports
+  ansible.posix.firewalld:
     port: item
     permanent: yes
     state: enabled

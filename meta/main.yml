@@ -2,6 +2,7 @@
 galaxy_info:
   role_name: coturn
   company: eBBBa
+  namespace: ebbba
   author: BrutalBirdie
   description: >
     Coturn for BigBlueButton installation (following the documentation on

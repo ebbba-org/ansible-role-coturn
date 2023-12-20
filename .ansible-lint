@@ -3,8 +3,3 @@
 exclude_paths:
   - .cache/
   - .github/
-warn_list:
-  - package-latest
-skip_list:
-  - fqcn-builtins
-  - internal-error

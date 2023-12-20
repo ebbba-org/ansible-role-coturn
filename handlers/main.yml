@@ -1,10 +1,10 @@
 ---
 
-- name: systemd daemon-reload
-  systemd:
+- name: Systemd daemon-reload
+  ansible.legacy.systemd:
     daemon_reload: yes
 
-- name: restart coturn
-  service:
+- name: Restart coturn
+  ansible.legacy.service:
     name: coturn
     state: restarted
