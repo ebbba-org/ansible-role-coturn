@@ -1,17 +1,17 @@
 ---
 
-- name: install dependencies
-  apt:
+- name: Install dependencies
+  ansible.legacy.apt:
     update_cache: true
     name: ufw
 
-- name: ufw allow known services
-  ufw:
+- name: UFW allow known services
+  community.general.ufw:
     rule: allow
     name: OpenSSH
 
-- name: ufw allow coturn standard ports
-  ufw:
+- name: UFW allow coturn standard ports
+  community.general.ufw:
     rule: allow
     port: "{{ item.port }}"
     proto: "{{ item.proto }}"
@@ -22,9 +22,10 @@
       proto: udp
     - port: "{{ coturn_min_port }}:{{ coturn_max_port }}"
       proto: udp
+  notify: restart coturn
 
-- name: ufw allow coturn tls port
-  ufw:
+- name: UFW allow coturn tls port
+  community.general.ufw:
     rule: allow
     port: "{{ item.port }}"
     proto: "{{ item.proto }}"
@@ -34,9 +35,10 @@
     - port: "{{ coturn_tls_listening_port }}"
       proto: udp
   when: coturn_use_tls
+  notify: restart coturn
 
-- name: enable firewall
-  ufw:
+- name: Enable firewall
+  community.general.ufw:
     state: enabled
     policy: reject
     logging: off

@@ -1,43 +1,43 @@
 ---
 
 - name: Install coturn
-  package:
+  ansible.legacy.package:
     name: coturn
     state: "{{ coturn_install_state }}"
 
 - name: Manage tls permissions
+  when: coturn_tls_group is defined
   block:
   - name: Fail if tls should be used but required values are not set
-    assert:
+    ansible.legacy.assert:
       that:
         - coturn_tls_listening_port is defined and coturn_tls_listening_port is truthy
         - coturn_tls_cert_dir is defined and coturn_tls_cert_dir is truthy
         - coturn_tls_cert is defined and coturn_tls_cert is truthy
         - coturn_tls_key is defined and coturn_tls_key is truthy
   - name: Add turnserver user to TLS group
-    user:
+    ansible.legacy.user:
       name: "{{ turn_user }}"
       groups: "{{ coturn_tls_group }}"
       append: true
-    when: coturn_tls_group is defined
 
   - name: Get file info of TLS Folder
-    stat:
+    ansible.legacy.stat:
       path: "{{ coturn_tls_cert_dir }}"
     register: stat_coturn_tls_cert_dir
 
   - name: Get info of cert post hooks folder
-    stat:
+    ansible.legacy.stat:
       path: /etc/letsencrypt/renewal-hooks/post
     register: certbot_post_hooks
 
   - name: Get info of cert pre hooks folder
-    stat:
+    ansible.legacy.stat:
       path: /etc/letsencrypt/renewal-hooks/post
     register: certbot_pre_hooks
 
   - name: Grant turnserver user access to certificate folder
-    acl:
+    ansible.posix.acl:
       path: "{{ coturn_tls_cert_dir }}"
       entity: "{{ turn_user }}"
       etype: user
@@ -47,7 +47,7 @@
     when: stat_coturn_tls_cert_dir.stat.exists
 
   - name: Setup certbot pre hooks
-    template:
+    ansible.legacy.template:
       src: "{{ item }}"
       dest: "/etc/letsencrypt/renewal-hooks/pre/{{ item | basename | regex_replace('\\.j2$', '') }}.sh"
       owner: "root"
@@ -58,7 +58,7 @@
     when: certbot_pre_hooks.stat.exists
 
   - name: Setup certbot post hooks
-    template:
+    ansible.legacy.template:
       src: "{{ item }}"
       dest: "/etc/letsencrypt/renewal-hooks/post/{{ item | basename | regex_replace('\\.j2$', '') }}.sh"
       owner: "root"
@@ -69,23 +69,23 @@
     when: certbot_post_hooks.stat.exists
 
   - name: Copy Diffie-Hellmann parameter (from https://ssl-config.mozilla.org/ffdhe2048.txt)
-    copy:
+    ansible.legacy.copy:
       src: dhparam.pem
       dest: /etc/dhparam.pem
       owner: root
       group: root
       mode: '0644'
-  when: coturn_use_tls
+    when: coturn_use_tls
 
 - name: Create systemd override for coturn
   block:
     - name: Create needed folder
-      file:
+      ansible.legacy.file:
         path: /etc/systemd/system/coturn.service.d/
         state: directory
         mode: '0755'
     - name: Copy coturn systemd override file
-      copy:
+      ansible.legacy.copy:
         src: override.conf
         dest: /etc/systemd/system/coturn.service.d/override.conf
         owner: root
@@ -98,14 +98,14 @@
 - name: Create lograte structure
   block:
     - name: Create needed folder
-      file:
+      ansible.legacy.file:
         path: /var/log/turnserver
         owner: "{{ turn_user }}"
         group: "{{ turn_user }}"
         state: directory
         mode: '0755'
     - name: Copy logrotate config
-      copy:
+      ansible.legacy.copy:
         src: logging.conf
         dest: /etc/logrotate.d/coturn
         owner: root
@@ -113,7 +113,7 @@
         mode: '0644'
 
 - name: Configure coturn
-  template:
+  ansible.legacy.template:
     src: turnserver.conf.j2
     dest: /etc/turnserver.conf
     owner: root
@@ -121,12 +121,10 @@
     mode: 0644
   notify: restart coturn
 
-- name: configure firewall on ubuntu
-  include: ufw.yml
+- name: Configure firewall on ubuntu
+  ansible.legacy.include_tasks: ufw.yml
   when: ansible_os_family == 'Debian'
-  notify: restart coturn
 
-- name: configure firewall on Centos
-  include: firewalld.yml
+- name: Configure firewall on Centos
+  ansible.legacy.include_tasks: firewalld.yml
   when: ansible_os_family == 'RedHat'
-  notify: restart coturn
