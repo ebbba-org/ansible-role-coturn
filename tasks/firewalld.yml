@@ -14,7 +14,7 @@
       proto: udp
   notify: restart coturn
 
-- name: Firewalld enable coturn tls ports
+- name: Firewalld enable coturn tls ports and certificate renewal
   ansible.posix.firewalld:
     port: item
     permanent: yes
@@ -22,5 +22,6 @@
   loop:
     - "{{ coturn_tls_listening_port }}/tcp"
     - "{{ coturn_tls_listening_port }}/udp"
+    - "80/tcp"
   when: coturn_use_tls
   notify: restart coturn
