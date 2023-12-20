@@ -12,7 +12,7 @@
       proto: udp
     - port: "{{ coturn_min_port }}-{{ coturn_max_port }}"
       proto: udp
-  notify: restart coturn
+  notify: Restart coturn
 
 - name: Firewalld enable coturn tls ports and certificate renewal
   ansible.posix.firewalld:
@@ -24,4 +24,4 @@
     - "{{ coturn_tls_listening_port }}/udp"
     - "80/tcp"
   when: coturn_use_tls
-  notify: restart coturn
+  notify: Restart coturn

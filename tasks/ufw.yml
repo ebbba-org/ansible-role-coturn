@@ -22,7 +22,7 @@
       proto: udp
     - port: "{{ coturn_min_port }}:{{ coturn_max_port }}"
       proto: udp
-  notify: restart coturn
+  notify: Restart coturn
 
 - name: UFW allow coturn tls port and certificate renewal
   community.general.ufw:
@@ -37,7 +37,7 @@
     - port: 80
       proto: tcp
   when: coturn_use_tls
-  notify: restart coturn
+  notify: Restart coturn
 
 - name: Enable firewall
   community.general.ufw:
