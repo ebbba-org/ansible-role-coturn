@@ -24,7 +24,7 @@
       proto: udp
   notify: restart coturn
 
-- name: UFW allow coturn tls port
+- name: UFW allow coturn tls port and certificate renewal
   community.general.ufw:
     rule: allow
     port: "{{ item.port }}"
@@ -34,6 +34,8 @@
       proto: tcp
     - port: "{{ coturn_tls_listening_port }}"
       proto: udp
+    - port: 80
+      proto: tcp
   when: coturn_use_tls
   notify: restart coturn
 
